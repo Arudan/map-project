@@ -17,13 +17,45 @@
     <link rel="stylesheet" href="css/main.css">
   </head>
   <body>
-    <div id="map"></div>
-
+    <main>
+			<div class="menu-wrap">
+				<nav class="menu-top">
+					<div class="search-bar">
+            <input type="text" name="search">
+          </div>
+					<div class="icon-list">
+						<a href="#"><i class="fa fa-fw fa-university"></i></a>
+						<a href="#"><i class="fa fa-fw fa-cutlery"></i></a>
+						<a href="#"><i class="fa fa-fw fa-glass"></i></a>
+					</div>
+				</nav>
+				<nav class="menu-side" data-bind="foreach: placeList">
+					<a href="#" data-bind="text: name"></a>
+				</nav>
+			</div>
+			<button class="menu-button" id="open-button" onclick="$('main').toggleClass('show-menu');">
+        Open Menu
+      </button>
+			<div class="content-wrap">
+        <div id="map"></div>
+      </div>
+    </main>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+    <script type="text/javascript">
+      // GoogleMap init
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 45.466342, lng: 9.188288},
+          zoom: 13,
+          disableDefaultUI: true
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M&callback=initMap"></script>
     <script src="js/app.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M&callback=initMap" async defer></script>
   </body>
 </html>
