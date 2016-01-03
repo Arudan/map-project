@@ -1,3 +1,5 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
+
 html,
 body,
 main,
@@ -5,6 +7,8 @@ main,
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
+	margin: 0;
+	font-family: 'Montserrat', sans-serif;
 }
 
 #map {
@@ -16,7 +20,7 @@ main {
 }
 
 .menu-wrap a {
-	color: #bababa;
+	color: rgba(186, 186, 186, 1);
 }
 
 .menu-wrap a:hover,
@@ -25,9 +29,7 @@ main {
 }
 
 .content-wrap {
-	overflow-y: scroll;
-	-webkit-overflow-scrolling: touch;
-	-webkit-transition: -webkit-transform 0.3s;
+	overflow-y: hidden;
 	transition: transform 0.3s;
 }
 
@@ -44,7 +46,6 @@ main {
 	font-size: 1.5em;
 	color: transparent;
 	background: transparent;
-	-webkit-transition: -webkit-transform 0.3s;
 	transition: transform 0.3s;
 }
 
@@ -70,7 +71,6 @@ main {
 	position: absolute;
 	font-weight: 700;
 	opacity: 0;
-	-webkit-transition: opacity 1s;
 	transition: opacity 1s;
 }
 
@@ -105,12 +105,13 @@ main {
 	font-size: 1.75em;
 }
 
-.icon-list a {
+.icon-list i {
+	color: rgba(186, 186, 186, 1);
 	margin: 0 1em 0 0;
 	padding: 0;
 }
 
-.icon-list a:active {
+.icon-list i:active, .icon-list i.active  {
   color: #177515;
 }
 
@@ -123,16 +124,11 @@ main {
 .menu-side a {
 	display: block;
 	padding: 1.2em;
-	border-bottom: 1px solid rgba(0,0,0,0.1);
   text-decoration: none;
 }
 
 .menu-side a:hover{
   text-decoration: none;
-}
-
-.menu-side a:first-child {
-	border-top: 1px solid rgba(0,0,0,0.1);
 }
 
 /* Shown menu */
@@ -142,14 +138,32 @@ main {
 
 .show-menu .content-wrap,
 .show-menu .menu-button {
-	-webkit-transform: translate3d(300px,60px,0);
 	transform: translate3d(300px,60px,0);
+}
+
+@media screen and (max-width: 400px) {
+	.show-menu .content-wrap,
+	.show-menu .menu-button {
+		transform: translate3d(400px,0,0);
+	}
+	.menu-top .search-bar, .menu-side {
+		width: 100%;
+	}
+}
+
+.menu-mobile-button {
+	padding: 5px, 0, 0;
+	color: rgba(186, 186, 186, 1);
+}
+
+@media screen and (min-width: 401px) {
+	.menu-mobile-button{
+		display: none;
+	}
 }
 
 .show-menu .content::before {
 	opacity: 1;
-	-webkit-transition: opacity 0.3s;
 	transition: opacity 0.3s;
-	-webkit-transform: translate3d(0,0,0);
 	transform: translate3d(0,0,0);
 }
