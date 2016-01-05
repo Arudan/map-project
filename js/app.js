@@ -5,14 +5,8 @@ String.prototype.capitalize = function() {
 
 // knockout
 
-// models
+// model
 var initialPlaces = [
-  // Schema for places
-  // {
-  //   name: ,
-  //   type: ,
-  //   position: {lat: 45.466342, lng: 9.188288},
-  // }
   {
     name: 'Bento',
     type: 'restaurant',
@@ -29,6 +23,8 @@ var initialPlaces = [
     position: {lat: 45.47, lng: 9.188288},
   }
 ];
+
+var flickrKey = '9f5d59e988bb37b823cc10a4302a4b43';
 
 var settings = {
   monument: {
@@ -69,6 +65,10 @@ var settings = {
   }
 };
 
+var createInfoText = function(place) {
+
+};
+
 var Place = function(data){
   var self = this;
 
@@ -81,10 +81,10 @@ var Place = function(data){
   self.icon = settings[self.type].icon;
 
   // Creates the marker
-  this.place.marker = new google.maps.Marker({
-    position: this.place.position,
-    title: this.place.name,
-    icon: settings[this.place.type].markerIcon
+  self.marker = new google.maps.Marker({
+    position: self.position,
+    title: self.name,
+    icon: settings[self.type].markerIcon
   });
 
   // sets the ko observable var rappresenting Place's visibility
@@ -93,9 +93,9 @@ var Place = function(data){
   // On change on isVisible, the marker visibility on map is toggled
   self.isVisible.subscribe(function(visibility) {
     if (visibility) {
-      this.place.marker.setMap(map);
+      self.marker.setMap(map);
     } else {
-      this.place.marker.setMap(null);
+      self.marker.setMap(null);
     }
   });
 
