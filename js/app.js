@@ -1,3 +1,9 @@
+// API settings
+var api = {
+  googlePlaces: 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=45.466342,9.188288&types=establishment&radius=5000&key=AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M&jsonp=callbackMethod',
+  flickr: '9f5d59e988bb37b823cc10a4302a4b43',
+};
+
 // An helper function to handle string capitalize
 String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
@@ -6,6 +12,8 @@ String.prototype.capitalize = function() {
 // knockout
 
 // model
+var jsonResult = ko.observableArray([]);
+
 var initialPlaces = [
   {
     name: 'Bento',
@@ -23,8 +31,6 @@ var initialPlaces = [
     position: {lat: 45.47, lng: 9.188288},
   }
 ];
-
-var flickrKey = '9f5d59e988bb37b823cc10a4302a4b43';
 
 var settings = {
   monument: {
@@ -66,7 +72,8 @@ var settings = {
 };
 
 var createInfoText = function(place) {
-
+  return "<h2>"+ place.name +"</h2>" +
+  "<h4>"+ place.icon +' '+ place.type.capitalize() + "</h4>";
 };
 
 var Place = function(data){
@@ -75,14 +82,13 @@ var Place = function(data){
   // properties of the Place object
   self.name = data.name;
   self.type = data.type;
-  self.position = data.position;
 
   // gets the icon from the settings object
   self.icon = settings[self.type].icon;
 
   // Creates the marker
   self.marker = new google.maps.Marker({
-    position: self.position,
+    position: data.position,
     title: self.name,
     icon: settings[self.type].markerIcon
   });
@@ -109,8 +115,7 @@ var Place = function(data){
 
   self.infoWindowOpen = function(place) {
     if (!self.infowindow) {
-      self.infoText = "<h2>"+ self.name +"</h2>" +
-        "<h4>"+ self.icon +' '+ self.type.capitalize() + "</h4>";
+      self.infoText = createInfoText(self);
 
       self.infowindow = new google.maps.InfoWindow({
         content: self.infoText
@@ -128,17 +133,28 @@ var Place = function(data){
 var ViewModel = function () {
   var self = this;
 
+  // List of places
   self.placeList = ko.observableArray([]);
 
+  // Gets the places data from the custom api and for each instanciate a Place
+  // object
+  /*initialPlaces.forEach(function(placeItem) {
+    self.placeList.push(new Place(placeItem));
+  });*/
+
+  jsonResult.subscribe(function() {
+    jsonResult.forEach(function(placeItem) {
+      self.placeList.push(new Place(placeItem));
+    });
+  });
+
+  // observables for filter
   self.currentFilter = ko.observable('');
   self.monumentsFilter = ko.observable(true);
   self.restaurantFilter = ko.observable(true);
   self.nightlifeFilter = ko.observable(true);
 
-  initialPlaces.forEach(function(placeItem) {
-    self.placeList.push(new Place(placeItem));
-  });
-
+  // functions to toggle the typologies filters
   self.toggleMonuments = function () {
     self.monumentsFilter( !self.monumentsFilter() );
   };
@@ -149,11 +165,14 @@ var ViewModel = function () {
     self.nightlifeFilter( !self.nightlifeFilter() );
   };
 
+  // function to filter place by text input
   self.filterPlaces = ko.computed(function () {
     var search  = self.currentFilter().toLowerCase();
 
+    // sets visibility of places based on the filter
     return ko.utils.arrayFilter(self.placeList(), function(place) {
         var match = true;
+        // first checks the place against type filters
         if (place.type === 'monument') {
           match = self.monumentsFilter();
         }
@@ -163,6 +182,7 @@ var ViewModel = function () {
         if (place.type === 'nightlife') {
           match = self.nightlifeFilter();
         }
+        // if match is still true, checks against search string
         if (match) {
           match = place.name.toLowerCase().indexOf(search) >= 0;
         }
@@ -185,4 +205,47 @@ function initMap() {
     disableDefaultUI: true
   });
   ko.applyBindings(new ViewModel());
+
+  service = new google.maps.places.PlacesService(map);
+
+  var types = [
+    ['callbackMonument', ['church', 'museum', 'library', 'park']],
+    ['callbackRestaurant', ['restaurant']],
+    ['callbackNightlife', ['bar']]
+  ];
+
+  var request = {
+    location: new google.maps.LatLng(45.466342,9.188288),
+    radius: '5000',
+  };
+
+  types.forEach(function(type){
+    request.types = type[1];
+    service.nearbySearch(request, window[type[0]]);
+  });
+
 }
+
+var callbackMonument = function(results){
+  results.forEach(function(result) {
+    result.type = 'monument';
+  });
+  console.log(results);
+  jsonResult.push(results);
+};
+
+var callbackRestaurant = function(results){
+  results.forEach(function(result, index) {
+    result.type = 'restaurant';
+  });
+  console.log(results);
+  jsonResult.push(results);
+};
+
+var callbackNightlife = function(results){
+  results.forEach(function(result, index) {
+    result.type = 'nightlife';
+  });
+  console.log(results);
+  jsonResult.push(results);
+};
