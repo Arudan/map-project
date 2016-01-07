@@ -13,12 +13,12 @@
 </head>
 
 <body>
-  <main>
+  <main data-bind="css: {'show-menu': showMenu}">
     <div class="menu-wrap">
       <nav class="menu-top">
         <div class="search-bar">
           <input id="search-input" type="text" name="search" data-bind="textInput: currentFilter">
-          <button class="btn btn-link menu-mobile-button pull-right" onclick="$('main').toggleClass('show-menu');">
+          <button class="btn btn-link menu-mobile-button pull-right" data-bind="click: toggleMenu">
             <i class="fa fa-times fa-2x"></i>
           </button>
         </div>
@@ -37,7 +37,7 @@
         </div>
       </nav>
     </div>
-    <button class="menu-button" id="open-button" onclick="$('main').toggleClass('show-menu');">
+    <button class="menu-button" id="open-button" data-bind="click: toggleMenu">
       Open Menu
     </button>
     <div class="content-wrap">
