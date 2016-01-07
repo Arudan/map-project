@@ -1,35 +1,31 @@
-// API settings
-var api = {
-  flickr: '9f5d59e988bb37b823cc10a4302a4b43',
-};
-
 // An helper function to handle string capitalize
 String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
-// knockout
+// ===========================
+//          SETTINGS
+// ===========================
 
-// model
-var initialPlaces = [
-  {
-    name: 'Bento',
-    type: 'restaurant',
-    position: {lat: 45.466342, lng: 9.188288},
+// API settings
+var api = {
+  fourSquare: {
+    url: 'https://api.foursquare.com/v2/venues/explore',
+    data: {
+      client_id: 'Q3JPRLMS5E2VEMJIMHFYQ2M2MR2PUZGLBCAZXRCFO3AXYF4W',
+      client_secret: 'VHO1ZTEUM5LZAC3FGWIISGYDWT0PKHGIQOLY4W40P5SADAAJ',
+      ll: '45.466342, 9.188288',
+      limit: '100',
+      radius: '3000',
+      v: '20160106',
+      m: 'foursquare',
+      section: ''
+    }
   },
-  {
-    name: 'MoM',
-    type: 'nightlife',
-    position: {lat: 45.44, lng: 9.188288},
-  },
-  {
-    name: 'Ciao',
-    type: 'monument',
-    position: {lat: 45.47, lng: 9.188288},
-  }
-];
+  flickr: '9f5d59e988bb37b823cc10a4302a4b43',
+};
 
-// object containing general settings
+// Place general settings
 var settings = {
   monument: {
     icon: '<i class="fa fa-fw fa-university"></i>',
@@ -52,7 +48,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#177515'
+      fillColor: '#c91010'
     }
   },
   nightlife: {
@@ -64,29 +60,35 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#177515'
+      fillColor: '#152275'
     }
   }
 };
 
+// ===========================
+//           PLACE
+// ===========================
+
+// UTILS
 var createInfoText = function(place) {
   return "<h2>"+ place.name +"</h2>" +
   "<h4>"+ place.icon +' '+ place.type.capitalize() + "</h4>";
 };
 
-var Place = function(data){
+// PLACE CLASS
+var Place = function(data, type){
   var self = this;
 
   // properties of the Place object
   self.name = data.name;
-  self.type = data.type;
+  self.type = type;
 
   // gets the icon from the settings object
   self.icon = settings[self.type].icon;
 
   // Creates the marker
   self.marker = new google.maps.Marker({
-    position: data.position,
+    position: {lat: data.location.lat, lng: data.location.lng},
     title: self.name,
     icon: settings[self.type].markerIcon
   });
@@ -125,9 +127,9 @@ var Place = function(data){
   };
 };
 
-// *********
-// viewmodel
-// *********
+// ===========================
+//        VIEW MODEL
+// ===========================
 var ViewModel = function () {
   var self = this;
 
@@ -139,10 +141,6 @@ var ViewModel = function () {
 
   // List of places
   self.placeList = ko.observableArray([]);
-
-  initialPlaces.forEach(function (place) {
-    self.placeList.push(new Place(place));
-  });
 
   // observables for filter
   self.currentFilter = ko.observable('');
@@ -189,7 +187,7 @@ var ViewModel = function () {
 };
 
 // MAP INIT
-var map;
+var map, mapViewModel;
 
 function initMap() {
   map = new google.maps.Map(document.getElementById('map'), {
@@ -200,5 +198,43 @@ function initMap() {
     zoom: 13,
     disableDefaultUI: true
   });
-  ko.applyBindings(new ViewModel());
+  mapViewModel = new ViewModel();
+  ko.applyBindings(mapViewModel);
+
+  var sections = [
+    {section: 'arts', callback: 'callbackMonuments'},
+    {section: 'food', callback: 'callbackRestaurants'},
+    {section: 'drinks', callback: 'callbackNightlife'}
+  ];
+
+  var fourSquareData = api.fourSquare.data;
+
+  sections.forEach(function(item){
+    fourSquareData.section = item.section;
+
+    $.ajax({
+      dataType: "json",
+      url: api.fourSquare.url,
+      data: fourSquareData,
+      success: window[item.callback]
+    });
+  });
 }
+
+var callbackMonuments = function(data) {
+  data.response.groups[0].items.forEach(function(item){
+    mapViewModel.placeList.push(new Place(item.venue, 'monument'));
+  });
+};
+
+var callbackRestaurants = function(data) {
+  data.response.groups[0].items.forEach(function(item){
+    mapViewModel.placeList.push(new Place(item.venue, 'restaurant'));
+  });
+};
+
+var callbackNightlife = function(data) {
+  data.response.groups[0].items.forEach(function(item){
+    mapViewModel.placeList.push(new Place(item.venue, 'nightlife'));
+  });
+};
