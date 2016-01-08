@@ -22,7 +22,30 @@ var api = {
       section: ''
     }
   },
-  flickr: '9f5d59e988bb37b823cc10a4302a4b43',
+  streetview: {
+    url: 'https://maps.googleapis.com/maps/api/streetview',
+    data: {
+      size: '600x300',
+      location: '46.414382,10.013988',
+      heading: '151.78',
+      pitch: '-0.76',
+      key: 'AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M'
+    }
+  },
+  panoramio: {
+    url: 'http://www.panoramio.com/map/get_panoramas.php',
+    data: {
+      set: 'public',
+      from: 0,
+      to: 1,
+      minx: -180,
+      miny: -90,
+      maxx: -180,
+      maxy: -90,
+      size: 'small',
+      mapfilter: true,
+    }
+  }
 };
 
 // Place general settings
@@ -36,7 +59,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#329a30'
+      fillColor: '#30CD2D'
     }
   },
   restaurant: {
@@ -60,7 +83,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#3148e2'
+      fillColor: '#6375F0'
     }
   }
 };
@@ -70,18 +93,37 @@ var settings = {
 // ===========================
 
 // UTILS
-var createInfoText = function(place) {
-  return "<h2>"+ place.name +"</h2>" +
-  "<h4>"+ place.icon +' '+ place.type.capitalize() + "</h4>";
+var getInfoText = function(place) {
+  var infoText = '<h2>' + place.name + '</h2>' +
+  '<h4>' + place.icon +' '+ place.type.capitalize() + '</h4>' +
+  '<h5>' + place.location() + '</h5>';
+
+  if (place.img){
+    var imgTxt = '<img src="' + place.img +'">';
+    infoText += imgTxt;
+  }
+  return infoText;
 };
 
 // PLACE CLASS
 var Place = function(data, type){
   var self = this;
 
+  // save the FourSquare api result
+  self.FourSquare = data;
+  // observable to contain the streetView image url
+
   // properties of the Place object
   self.name = data.name;
   self.type = type;
+  self.lat = data.location.lat;
+  self.lng = data.location.lng;
+
+  self.location = ko.computed(function() {
+        return self.lat + ", " + self.lng;
+    }, self);
+
+  self.img = '';
 
   // gets the icon from the settings object
   self.icon = settings[self.type].icon;
@@ -108,22 +150,57 @@ var Place = function(data, type){
   // Sets the marker as visible on creation
   self.isVisible(true);
 
-  // adds a 'click' event listener on the marker
-  self.marker.addListener('click', function() {
-    self.infoWindowOpen();
+  self.active = ko.observable(false);
+
+  self.active.subscribe(function(status) {
+    if (status) {
+      self.infoWindowOpen();
+    } else {
+      self.infoWindow.close();
+    }
   });
 
-  self.infoWindowOpen = function() {
-    if (!self.infowindow) {
-      self.infoText = createInfoText(self);
+  // adds a 'click' event listener on the marker
+  self.marker.addListener('click', function() {
+    self.infoWindowToggle();
+  });
 
-      self.infowindow = new google.maps.InfoWindow({
+  self.infoWindowToggle = function() {
+    self.active(!self.active());
+  };
+
+  self.infoWindowOpen = function() {
+    if (!self.infoWindow) {
+      self.infoText = getInfoText(self);
+      self.infoWindow = new google.maps.InfoWindow({
         content: self.infoText
       });
+    } else {
+      self.infoWindow.setContent(self.infoText);
     }
-    self.infowindow.open(map, self.marker);
+
+    self.infoWindow.open(map, self.marker);
     self.marker.setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(function(){ self.marker.setAnimation(null); }, 500);
+    setTimeout(function(){
+      self.marker.setAnimation(null);
+    }, 500);
+
+    if (!self.img){
+      this.api = api.panoramio;
+      this.api.dataType = "jsonp";
+      this.api.data.miny = self.lat - 0.001;
+      this.api.data.minx = self.lng - 0.001;
+      this.api.data.maxy = self.lat + 0.001;
+      this.api.data.maxx = self.lng + 0.001;
+      this.api.success = function(data){
+        if (data.photos[0]){
+          self.img = data.photos[0].photo_file_url;
+          self.infoText = getInfoText(self);
+          self.infoWindow.setContent(self.infoText);
+        }
+      };
+      $.ajax(this.api);
+    }
   };
 };
 

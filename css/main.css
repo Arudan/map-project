@@ -41,19 +41,19 @@ main {
 	color: rgba(186, 186, 186, 1);
 }
 
-.menu-wrap a.monument:hover,
-.menu-wrap a.monument:focus {
-	color: #329a30;
+.menu-wrap div.monument a:hover,
+.menu-wrap div.monument a.active {
+	color: #30CD2D;
 }
 
-.menu-wrap a.restaurant:hover,
-.menu-wrap a.restaurant:focus {
+.menu-wrap div.restaurant a.restaurant:hover,
+.menu-wrap div.restaurant a.active {
 	color: #eb2b2b;
 }
 
-.menu-wrap a.nightlife:hover,
-.menu-wrap a.nightlife:focus {
-	color: #3148e2;
+.menu-wrap div.nightlife a:hover,
+.menu-wrap div.nightlife a.active {
+	color: #6375F0;
 }
 
 .content-wrap {
@@ -97,9 +97,9 @@ main {
 /* Menu */
 .menu-wrap {
 	position: absolute;
-	font-weight: 700;
 	opacity: 0;
 	transition: opacity 1s;
+	font-size: 1em;
 }
 
 .menu-top {
@@ -145,7 +145,7 @@ main {
 }
 
 .icon-list i.monument:active, .icon-list i.monument.active  {
-  color: #329a30;
+  color: #30CD2D;
 }
 
 .icon-list i.restaurant:active, .icon-list i.restaurant.active  {
@@ -153,7 +153,7 @@ main {
 }
 
 .icon-list i.nightlife:active, .icon-list i.nightlife.active  {
-  color: #3148e2;
+  color: #6375F0;
 }
 
 @media screen and (max-width: 32em) {

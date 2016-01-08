@@ -8,7 +8,6 @@
   <title>Map</title>
 
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/main.css">
 </head>
 
@@ -29,8 +28,8 @@
         </div>
       </nav>
       <nav class="menu-side" data-bind="foreach: placeList">
-        <div data-bind="if: isVisible">
-          <a href="#" data-bind="click: infoWindowOpen, css: type">
+        <div data-bind="if: isVisible, css: type">
+          <a href="#" data-bind="click: infoWindowToggle, css: { active: active }">
             <span data-bind="html: icon"></span>
             <span data-bind="text: name"></span>
           </a>
@@ -46,12 +45,11 @@
   </main>
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
   <script src="js/fontawesome-markers.min.js"></script>
   <script src="js/app.js"></script>
 
-  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M&callback=initMap&libraries=places"></script>
+  <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M&callback=initMap"></script>
 </body>
 
 </html>
