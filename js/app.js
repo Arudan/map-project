@@ -142,6 +142,12 @@ var ViewModel = function () {
   // List of places
   self.placeList = ko.observableArray([]);
 
+  self.sortPlaceListByName = function(){
+    self.placeList.sort(function (left, right) {
+      return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1);
+    });
+  };
+
   // observables for filter
   self.currentFilter = ko.observable('');
   self.monumentsFilter = ko.observable(true);
@@ -195,7 +201,7 @@ function initMap() {
       lat: 45.466342,
       lng: 9.188288
     },
-    zoom: 13,
+    zoom: 14,
     disableDefaultUI: true
   });
   mapViewModel = new ViewModel();
@@ -221,20 +227,21 @@ function initMap() {
   });
 }
 
-var callbackMonuments = function(data) {
+var baseCallback = function(data, type) {
   data.response.groups[0].items.forEach(function(item){
-    mapViewModel.placeList.push(new Place(item.venue, 'monument'));
+    mapViewModel.placeList.push(new Place(item.venue, type));
   });
+  mapViewModel.sortPlaceListByName();
+};
+
+var callbackMonuments = function(data) {
+  baseCallback(data, 'monument');
 };
 
 var callbackRestaurants = function(data) {
-  data.response.groups[0].items.forEach(function(item){
-    mapViewModel.placeList.push(new Place(item.venue, 'restaurant'));
-  });
+  baseCallback(data, 'restaurant');
 };
 
 var callbackNightlife = function(data) {
-  data.response.groups[0].items.forEach(function(item){
-    mapViewModel.placeList.push(new Place(item.venue, 'nightlife'));
-  });
+  baseCallback(data, 'nightlife');
 };
