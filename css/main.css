@@ -1,5 +1,23 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat);
 
+/* Scrollbar (thanks to http://www.hongkiat.com/blog/css-scroll-bar/) */
+::-webkit-scrollbar {
+    width: 16px;
+}
+::-webkit-scrollbar-track {
+    background-color: #393939;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+		border-radius: 10px;
+		padding-right: 2px;
+		background-clip: padding-box;
+		border: 4px solid rgba(0, 0, 0, 0);
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #aaa;
+}
+/* Body and menu (inspired by Codrops) */
 html,
 body,
 main,
@@ -85,7 +103,7 @@ main {
 }
 
 .menu-top {
-	line-height: 58px;
+	line-height: 55px;
 }
 
 .menu-top .search-bar {
@@ -106,7 +124,7 @@ main {
 }
 
 .menu-side {
-	height: 90vh;
+	height: calc(100vh - 60px);
 	overflow-y: scroll;
 }
 
