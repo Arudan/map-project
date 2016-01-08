@@ -36,7 +36,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#177515'
+      fillColor: '#329a30'
     }
   },
   restaurant: {
@@ -48,7 +48,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#c91010'
+      fillColor: '#eb2b2b'
     }
   },
   nightlife: {
@@ -60,7 +60,7 @@ var settings = {
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#152275'
+      fillColor: '#3148e2'
     }
   }
 };

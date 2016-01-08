@@ -23,9 +23,19 @@ main {
 	color: rgba(186, 186, 186, 1);
 }
 
-.menu-wrap a:hover,
-.menu-wrap a:focus {
-	color: #177515;
+.menu-wrap a.monument:hover,
+.menu-wrap a.monument:focus {
+	color: #329a30;
+}
+
+.menu-wrap a.restaurant:hover,
+.menu-wrap a.restaurant:focus {
+	color: #eb2b2b;
+}
+
+.menu-wrap a.nightlife:hover,
+.menu-wrap a.nightlife:focus {
+	color: #3148e2;
 }
 
 .content-wrap {
@@ -95,6 +105,11 @@ main {
 	width: 300px;
 }
 
+.menu-side {
+	height: 90vh;
+	overflow-y: scroll;
+}
+
 .menu-top .profile img {
 	float: left;
 	margin-right: 1em;
@@ -111,8 +126,16 @@ main {
 	padding: 0;
 }
 
-.icon-list i:active, .icon-list i.active  {
-  color: #177515;
+.icon-list i.monument:active, .icon-list i.monument.active  {
+  color: #329a30;
+}
+
+.icon-list i.restaurant:active, .icon-list i.restaurant.active  {
+  color: #eb2b2b;
+}
+
+.icon-list i.nightlife:active, .icon-list i.nightlife.active  {
+  color: #3148e2;
 }
 
 @media screen and (max-width: 32em) {

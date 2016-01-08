@@ -23,14 +23,14 @@
           </button>
         </div>
         <div class="icon-list">
-          <i class="fa fa-fw fa-university" data-bind="click: toggleMonuments, css: { active: monumentsFilter }"></i>
-          <i class="fa fa-fw fa-cutlery" data-bind="click: toggleRestaurant, css: { active: restaurantFilter }"></i>
-          <i class="fa fa-fw fa-glass" data-bind="click: toggleNightlife, css: { active: nightlifeFilter }"></i>
+          <i class="monument fa fa-fw fa-university" data-bind="click: toggleMonuments, css: { active: monumentsFilter }"></i>
+          <i class="restaurant fa fa-fw fa-cutlery" data-bind="click: toggleRestaurant, css: { active: restaurantFilter }"></i>
+          <i class="nightlife fa fa-fw fa-glass" data-bind="click: toggleNightlife, css: { active: nightlifeFilter }"></i>
         </div>
       </nav>
       <nav class="menu-side" data-bind="foreach: placeList">
         <div data-bind="if: isVisible">
-          <a href="#" data-bind="click: infoWindowOpen">
+          <a href="#" data-bind="click: infoWindowOpen, css: type">
             <span data-bind="html: icon"></span>
             <span data-bind="text: name"></span>
           </a>
