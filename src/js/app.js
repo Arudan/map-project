@@ -189,7 +189,6 @@ var Place = function(data, type){
     // opens infowindow
     self.infoWindow.open(map, self.marker);
 
-    map.setCenter(self.marker.getPosition());
     // marker bounces on opening
     self.marker.setAnimation(google.maps.Animation.BOUNCE);
     // reset animation after 500 ms
@@ -306,6 +305,7 @@ var ViewModel = function () {
         if (match) {
           match = place.name.toLowerCase().indexOf(search) >= 0;
         }
+        // sets the visibility of the Place
         place.isVisible(match);
         return match;
     });
@@ -315,7 +315,9 @@ var ViewModel = function () {
 // MAP INIT
 var map, mapViewModel;
 
+// callback of the google maps function
 function initMap() {
+  // map setup
   map = new google.maps.Map(document.getElementById('map'), {
     center: {
       lat: 45.466342,
@@ -324,17 +326,20 @@ function initMap() {
     zoom: 14,
     disableDefaultUI: true
   });
+  // KO viewModel
   mapViewModel = new ViewModel();
   ko.applyBindings(mapViewModel);
 
+  // loads places data from FourSquare
   var sections = [
     {section: 'arts', callback: 'callbackMonuments'},
     {section: 'food', callback: 'callbackRestaurants'},
     {section: 'drinks', callback: 'callbackNightlife'}
   ];
-
+  // base options for fourSquare
   var fourSquareData = api.fourSquare.data;
 
+  // cycles through sections to load datas for category
   sections.forEach(function(item){
     fourSquareData.section = item.section;
 
@@ -347,6 +352,7 @@ function initMap() {
   });
 }
 
+// base callback for FourSquare ajax
 var baseCallback = function(data, type) {
   data.response.groups[0].items.forEach(function(item){
     mapViewModel.placeList.push(new Place(item.venue, type));
@@ -365,3 +371,17 @@ var callbackRestaurants = function(data) {
 var callbackNightlife = function(data) {
   baseCallback(data, 'nightlife');
 };
+
+// Async loading of Google Fonts
+WebFontConfig = {
+  google: { families: [ 'Montserrat::latin' ] }
+};
+(function() {
+  var wf = document.createElement('script');
+  wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+    '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+  wf.type = 'text/javascript';
+  wf.async = 'true';
+  var s = document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(wf, s);
+})();
