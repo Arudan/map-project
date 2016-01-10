@@ -1,4 +1,4 @@
-// An helper function to handle string capitalize
+// An helper function to handle string capitalization
 String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
 };
@@ -22,28 +22,20 @@ var api = {
       section: ''
     }
   },
-  streetview: {
-    url: 'https://maps.googleapis.com/maps/api/streetview',
-    data: {
-      size: '600x300',
-      location: '46.414382,10.013988',
-      heading: '151.78',
-      pitch: '-0.76',
-      key: 'AIzaSyDeqVfiJlFl0hvpayE9E8soja7pqyl7I8M'
-    }
-  },
   panoramio: {
     url: 'http://www.panoramio.com/map/get_panoramas.php',
     data: {
       set: 'public',
       from: 0,
       to: 1,
-      minx: -180,
-      miny: -90,
-      maxx: -180,
-      maxy: -90,
       size: 'small',
       mapfilter: true,
+    }
+  },
+  openWeatherMap: {
+    url: 'http://api.openweathermap.org/data/2.5/weather',
+    data: {
+      appid: 'a2cece10a398e7a25c1aafe086efa12a'
     }
   }
 };
@@ -55,11 +47,11 @@ var settings = {
     markerIcon: {
       path: fontawesome.markers.UNIVERSITY,
       scale: 0.4,
-      strokeWeight: 0.2,
+      strokeWeight: 0.3,
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#30CD2D'
+      fillColor: '#cdb946'
     }
   },
   restaurant: {
@@ -67,11 +59,11 @@ var settings = {
     markerIcon: {
       path: fontawesome.markers.CUTLERY,
       scale: 0.4,
-      strokeWeight: 0.2,
+      strokeWeight: 0.3,
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#eb2b2b'
+      fillColor: '#f05858'
     }
   },
   nightlife: {
@@ -79,11 +71,11 @@ var settings = {
     markerIcon: {
       path: fontawesome.markers.GLASS,
       scale: 0.4,
-      strokeWeight: 0.2,
+      strokeWeight: 0.3,
       strokeColor: '#000000',
       strokeOpacity: 1,
       fillOpacity: 1,
-      fillColor: '#6375F0'
+      fillColor: '#64b3e1'
     }
   }
 };
@@ -92,16 +84,24 @@ var settings = {
 //           PLACE
 // ===========================
 
-// UTILS
+// Util to create infowindow text
 var getInfoText = function(place) {
-  var infoText = '<h2>' + place.name + '</h2>' +
+  var infoText = '<div class="infotext">' +
   '<h4>' + place.icon +' '+ place.type.capitalize() + '</h4>' +
-  '<h5>' + place.location() + '</h5>';
+  '<h3>'+ place.name +'</h3>' +
+  '<h5>' + place.address + '</h5>' +
+  '<h6>' + place.location() + '</h6>';
+
+  if (place.weather){
+    infoText += '<h5>Weather:'+
+    '<img class="weather" src="http://openweathermap.org/img/w/'+
+    place.weather.icon +'.png"></h5>';
+  }
 
   if (place.img){
-    var imgTxt = '<img src="' + place.img +'">';
-    infoText += imgTxt;
+    infoText += '<img src="' + place.img +'">';
   }
+  infoText += '</div>';
   return infoText;
 };
 
@@ -109,21 +109,15 @@ var getInfoText = function(place) {
 var Place = function(data, type){
   var self = this;
 
-  // save the FourSquare api result
-  self.FourSquare = data;
-  // observable to contain the streetView image url
-
   // properties of the Place object
   self.name = data.name;
   self.type = type;
   self.lat = data.location.lat;
   self.lng = data.location.lng;
-
+  self.address = data.location.address;
   self.location = ko.computed(function() {
         return self.lat + ", " + self.lng;
     }, self);
-
-  self.img = '';
 
   // gets the icon from the settings object
   self.icon = settings[self.type].icon;
@@ -150,14 +144,17 @@ var Place = function(data, type){
   // Sets the marker as visible on creation
   self.isVisible(true);
 
+  // is the infowindow active?
   self.active = ko.observable(false);
 
+  // on active observable change, open/close infowindow
   self.active.subscribe(function(status) {
     if (status) {
       self.infoWindowOpen();
     } else {
       self.infoWindow.close();
     }
+    mapViewModel.sortPlaceListByName();
   });
 
   // adds a 'click' event listener on the marker
@@ -165,42 +162,84 @@ var Place = function(data, type){
     self.infoWindowToggle();
   });
 
+  // toggling of active observable
   self.infoWindowToggle = function() {
     self.active(!self.active());
   };
 
   self.infoWindowOpen = function() {
+    // If infoWindow doesn't exist, creates it
     if (!self.infoWindow) {
+      // gets the text
       self.infoText = getInfoText(self);
+      // creates infowindow
       self.infoWindow = new google.maps.InfoWindow({
         content: self.infoText
       });
+      // adds a listener for the closeclick
+      self.infoWindow.addListener('closeclick',function(){
+        // on closeclick sets active observable to false
+        self.active(false);
+      });
     } else {
+      // if the infowindow already exist, refresh text
       self.infoWindow.setContent(self.infoText);
     }
 
+    // opens infowindow
     self.infoWindow.open(map, self.marker);
+
+    map.setCenter(self.marker.getPosition());
+    // marker bounces on opening
     self.marker.setAnimation(google.maps.Animation.BOUNCE);
+    // reset animation after 500 ms
     setTimeout(function(){
       self.marker.setAnimation(null);
     }, 500);
 
+    // OpenWeatherMap API ajax call
+
+    // call only if it hasn't returned a result before
+    if (!self.weather){
+      // gets general setting from api object
+      this.openWeatherMap = api.openWeatherMap;
+      // sets place specific data
+      this.openWeatherMap.data.lat = self.lat;
+      this.openWeatherMap.data.lon = self.lng;
+      // sets success function
+      this.openWeatherMap.success = function(data){
+        if (data.weather[0]){
+          self.weather = data.weather[0];
+          self.infoText = getInfoText(self);
+          self.infoWindow.setContent(self.infoText);
+        }
+      };
+      $.ajax(this.openWeatherMap);
+    }
+
+    // Panoramio API ajax call
+
+    // call only if it hasn't returned a result before
     if (!self.img){
-      this.api = api.panoramio;
-      this.api.dataType = "jsonp";
-      this.api.data.miny = self.lat - 0.001;
-      this.api.data.minx = self.lng - 0.001;
-      this.api.data.maxy = self.lat + 0.001;
-      this.api.data.maxx = self.lng + 0.001;
-      this.api.success = function(data){
+      // gets general setting from api object
+      this.panoramio = api.panoramio;
+      // sets place specific data
+      this.panoramio.dataType = "jsonp";
+      this.panoramio.data.miny = self.lat - 0.001;
+      this.panoramio.data.minx = self.lng - 0.001;
+      this.panoramio.data.maxy = self.lat + 0.001;
+      this.panoramio.data.maxx = self.lng + 0.001;
+      // sets success function
+      this.panoramio.success = function(data){
         if (data.photos[0]){
           self.img = data.photos[0].photo_file_url;
           self.infoText = getInfoText(self);
           self.infoWindow.setContent(self.infoText);
         }
       };
-      $.ajax(this.api);
+      $.ajax(this.panoramio);
     }
+
   };
 };
 
@@ -221,7 +260,11 @@ var ViewModel = function () {
 
   self.sortPlaceListByName = function(){
     self.placeList.sort(function (left, right) {
-      return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1);
+      if (left.active() === right.active()){
+        return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1);
+      } else {
+        return left.active() < right.active() ? 1 : -1;
+      }
     });
   };
 
