@@ -20,6 +20,10 @@ var api = {
       v: '20160106',
       m: 'foursquare',
       section: ''
+    },
+    dataType: "json",
+    error: function() {
+      toastr.error('Error in loading data from FourSquare');
     }
   },
   panoramio: {
@@ -30,12 +34,18 @@ var api = {
       to: 1,
       size: 'small',
       mapfilter: true,
+    },
+    error: function() {
+      toastr.error('Error in loading data from Panoramio');
     }
   },
   openWeatherMap: {
     url: 'http://api.openweathermap.org/data/2.5/weather',
     data: {
       appid: 'a2cece10a398e7a25c1aafe086efa12a'
+    },
+    error: function() {
+      toastr.error('Error in loading data from openMapWeather');
     }
   }
 };
@@ -337,18 +347,13 @@ function initMap() {
     {section: 'drinks', callback: 'callbackNightlife'}
   ];
   // base options for fourSquare
-  var fourSquareData = api.fourSquare.data;
+  var fourSquare = api.fourSquare;
 
   // cycles through sections to load datas for category
   sections.forEach(function(item){
-    fourSquareData.section = item.section;
-
-    $.ajax({
-      dataType: "json",
-      url: api.fourSquare.url,
-      data: fourSquareData,
-      success: window[item.callback]
-    });
+    fourSquare.data.section = item.section;
+    fourSquare.success = window[item.callback];
+    $.ajax(fourSquare);
   });
 }
 
