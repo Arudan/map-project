@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "knockout": "~3.4.0",
-    "jquery": "~2.2.0"
+    "jquery": "~2.2.0",
+    "toastr": "~2.1.2"
   }
 }
