@@ -13,7 +13,7 @@
   },
   "homepage": "https://github.com/Arudan/map-project#readme",
   "devDependencies": {
-    "browserify": "^13.0.0",
+    "browser-sync": "^2.11.0",
     "del": "^2.2.0",
     "gulp": "^3.9.0",
     "gulp-cssnano": "^2.1.0",
