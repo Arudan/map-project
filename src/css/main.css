@@ -127,11 +127,6 @@ main {
 	overflow-y: scroll;
 }
 
-.menu-top .profile img {
-	float: left;
-	margin-right: 1em;
-}
-
 .icon-list {
 	display: inline-block;
 	font-size: 1.75em;
