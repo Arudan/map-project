@@ -178,6 +178,8 @@ var Place = function(data, type){
   };
 
   self.infoWindowOpen = function() {
+    map.setCenter(self.marker.getPosition());
+
     // If infoWindow doesn't exist, creates it
     if (!self.infoWindow) {
       // gets the text
@@ -187,7 +189,7 @@ var Place = function(data, type){
         content: self.infoText
       });
       // adds a listener for the closeclick
-      self.infoWindow.addListener('closeclick',function(){
+      self.infoWindow.addListener('closeclick', function(){
         // on closeclick sets active observable to false
         self.active(false);
       });
@@ -219,8 +221,7 @@ var Place = function(data, type){
       this.openWeatherMap.success = function(data){
         if (data.weather[0]){
           self.weather = data.weather[0];
-          self.infoText = getInfoText(self);
-          self.infoWindow.setContent(self.infoText);
+          self.refreshInfoText();
         }
       };
       $.ajax(this.openWeatherMap);
@@ -242,13 +243,19 @@ var Place = function(data, type){
       this.panoramio.success = function(data){
         if (data.photos[0]){
           self.img = data.photos[0].photo_file_url;
-          self.infoText = getInfoText(self);
-          self.infoWindow.setContent(self.infoText);
+          self.refreshInfoText();
         }
       };
       $.ajax(this.panoramio);
     }
-
+    if (mq.matches){
+      mapViewModel.showMenu(false);
+    }
+  };
+  self.refreshInfoText = function(){
+    self.infoText = getInfoText(self);
+    self.infoWindow.setContent(self.infoText);
+    self.infoWindow.open(map, self.marker);
   };
 };
 
@@ -376,6 +383,9 @@ var callbackRestaurants = function(data) {
 var callbackNightlife = function(data) {
   baseCallback(data, 'nightlife');
 };
+
+// Media query
+var mq = window.matchMedia( "(max-width: 500px)" );
 
 // Async loading of Google Fonts
 WebFontConfig = {
